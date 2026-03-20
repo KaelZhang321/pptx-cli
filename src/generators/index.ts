@@ -1,5 +1,8 @@
+import { createRequire } from 'node:module';
 import type { Presentation, Slide, SlideContent } from '../parser/ast.js';
 import type { Template } from '../templates/index.js';
+
+const require = createRequire(import.meta.url);
 
 export class PPTXGenerator {
   private pptx: any;
@@ -7,8 +10,8 @@ export class PPTXGenerator {
 
   constructor(template: Template) {
     this.template = template;
-    const pptxgenjs = require('pptxgenjs');
-    this.pptx = new pptxgenjs();
+    const PptxGenJS = require('pptxgenjs');
+    this.pptx = new PptxGenJS();
     this.setupPresentation();
   }
 
