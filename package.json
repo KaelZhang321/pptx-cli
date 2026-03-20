@@ -7,7 +7,7 @@
     "pptx-cli": "./dist/cli/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/templates/built-in/*.json dist/templates/built-in/",
     "dev": "tsc --watch",
     "start": "node dist/cli/index.js"
   },

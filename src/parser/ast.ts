@@ -50,10 +50,19 @@ export type SlideContent =
   | TableContent 
   | ListContent;
 
+export type SlideType = 'cover' | 'section' | 'content' | 'twoColumn';
+
 export interface Slide {
   title: string;
+  subtitle?: string;
+  type?: SlideType;
   template?: string;
   contents: SlideContent[];
+  meta?: {
+    author?: string;
+    date?: string;
+    highlight?: string;
+  };
 }
 
 export interface Presentation {

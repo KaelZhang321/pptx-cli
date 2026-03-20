@@ -1,0 +1,26 @@
+{
+  "name": "corporate",
+  "colors": {
+    "primary": "#2B6CB0",
+    "secondary": "#4A5568",
+    "background": "#F7FAFC",
+    "text": "#1A2B4C",
+    "accent": "#2B6CB0"
+  },
+  "fonts": {
+    "title": { "name": "Microsoft YaHei", "size": 32, "bold": true },
+    "subtitle": { "name": "Microsoft YaHei", "size": 18 },
+    "body": { "name": "Microsoft YaHei", "size": 14 }
+  },
+  "layouts": {
+    "title": {},
+    "content": { "titleY": 0.05, "contentY": 0.2, "padding": 0.5 },
+    "cover": { "cardPadding": 0.1, "accentBarHeight": 0.03, "titleY": 0.25, "subtitleY": 0.4 },
+    "section": { "titleY": 0.35, "accentWidth": 0.02 },
+    "twoColumn": { "leftX": 0.5, "rightX": 5.0, "columnWidth": 4.5 }
+  },
+  "slide": {
+    "width": 10,
+    "height": 5.625
+  }
+}

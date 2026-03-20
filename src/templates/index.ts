@@ -13,6 +13,7 @@ export interface Template {
     background: string;
     text: string;
     accent: string;
+    [key: string]: string | undefined;
   };
   fonts: {
     title: { name: string; size: number; bold?: boolean };
@@ -22,6 +23,9 @@ export interface Template {
   layouts: {
     title: Record<string, unknown>;
     content: Record<string, unknown>;
+    cover?: Record<string, unknown>;
+    section?: Record<string, unknown>;
+    twoColumn?: Record<string, unknown>;
   };
   slide: {
     width: number;
