@@ -1,0 +1,36 @@
+{
+  "name": "minimal",
+  "colors": {
+    "primary": "#000000",
+    "secondary": "#666666",
+    "background": "#FFFFFF",
+    "text": "#333333",
+    "accent": "#000000"
+  },
+  "fonts": {
+    "title": { "name": "Arial", "size": 36, "bold": true },
+    "subtitle": { "name": "Arial", "size": 24 },
+    "body": { "name": "Arial", "size": 16 }
+  },
+  "layouts": {
+    "title": {
+      "titleX": 0.5,
+      "titleY": 3,
+      "titleW": 9,
+      "titleH": 1,
+      "centered": true
+    },
+    "content": {
+      "titleX": 0.5,
+      "titleY": 0.5,
+      "titleW": 9,
+      "contentX": 0.5,
+      "contentY": 1.5,
+      "contentW": 9
+    }
+  },
+  "slide": {
+    "width": 10,
+    "height": 7.5
+  }
+}

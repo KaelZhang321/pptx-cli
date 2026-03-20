@@ -1,0 +1,36 @@
+{
+  "name": "dark",
+  "colors": {
+    "primary": "#60A5FA",
+    "secondary": "#94A3B8",
+    "background": "#1E293B",
+    "text": "#F1F5F9",
+    "accent": "#3B82F6"
+  },
+  "fonts": {
+    "title": { "name": "Arial", "size": 44, "bold": true },
+    "subtitle": { "name": "Arial", "size": 28 },
+    "body": { "name": "Arial", "size": 18 }
+  },
+  "layouts": {
+    "title": {
+      "titleX": 0.5,
+      "titleY": 2.5,
+      "titleW": 9,
+      "titleH": 1,
+      "centered": true
+    },
+    "content": {
+      "titleX": 0.5,
+      "titleY": 0.5,
+      "titleW": 9,
+      "contentX": 0.5,
+      "contentY": 1.5,
+      "contentW": 9
+    }
+  },
+  "slide": {
+    "width": 10,
+    "height": 7.5
+  }
+}
