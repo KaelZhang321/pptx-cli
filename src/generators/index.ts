@@ -1,17 +1,20 @@
 import { createRequire } from 'node:module';
 import type { Presentation, Slide, SlideContent, SlideType } from '../parser/ast.js';
 import type { Template } from '../templates/index.js';
+import { InfographicGenerator } from './infographic.js';
 
 const require = createRequire(import.meta.url);
 
 export class PPTXGenerator {
   private pptx: any;
   private template: Template;
+  private infographicGenerator: InfographicGenerator;
 
   constructor(template: Template) {
     this.template = template;
     const PptxGenJS = require('pptxgenjs');
     this.pptx = new PptxGenJS();
+    this.infographicGenerator = new InfographicGenerator();
     this.setupPresentation();
   }
 
@@ -34,6 +37,7 @@ export class PPTXGenerator {
     }
 
     const buffer = await this.pptx.write({ outputType: 'nodebuffer' });
+    this.infographicGenerator.cleanup();
     return buffer as Buffer;
   }
 
@@ -48,7 +52,7 @@ export class PPTXGenerator {
         this.generateSectionSlide(slide);
         break;
       default:
-        this.generateContentSlide(slide);
+        await this.generateContentSlide(slide);
     }
   }
 
@@ -229,7 +233,7 @@ export class PPTXGenerator {
     }
   }
 
-  private generateContentSlide(slide: Slide): void {
+  private async generateContentSlide(slide: Slide): Promise<void> {
     const pptxSlide = this.pptx.addSlide();
     const colors = this.template.colors as any;
     
@@ -268,15 +272,15 @@ export class PPTXGenerator {
     
     let y = 1.3;
     for (const content of slide.contents) {
-      y = this.addContent(pptxSlide, content, y);
+      y = await this.addContent(pptxSlide, content, y);
     }
   }
 
-  private addContent(
+  private async addContent(
     pptxSlide: any,
     content: SlideContent,
     startY: number
-  ): number {
+  ): Promise<number> {
     const colors = this.template.colors as any;
     
     switch (content.type) {
@@ -317,6 +321,35 @@ export class PPTXGenerator {
           h: 3,
         });
         return startY + 3.5;
+
+      case 'infographic':
+        try {
+          const result = await this.infographicGenerator.render(content);
+          const scale = Math.min(8 / result.width, 4 / result.height);
+          const displayWidth = result.width * scale;
+          const displayHeight = result.height * scale;
+          const x = (10 - displayWidth) / 2;
+          
+          pptxSlide.addImage({
+            path: result.imagePath,
+            x: x,
+            y: startY,
+            w: displayWidth,
+            h: displayHeight,
+          });
+          return startY + displayHeight + 0.3;
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          pptxSlide.addText(`[Infographic Error: ${errorMsg}]`, {
+            x: 0.5,
+            y: startY,
+            w: 9,
+            fontSize: 12,
+            fontFace: 'Microsoft YaHei',
+            color: 'FF0000',
+          });
+          return startY + 0.5;
+        }
 
       default:
         return startY;

@@ -42,13 +42,23 @@ export interface ListContent {
   ordered: boolean;
 }
 
+export interface InfographicContent {
+  type: 'infographic';
+  syntax: string;
+  template?: string;
+  theme?: string;
+  width?: number;
+  height?: number;
+}
+
 export type SlideContent = 
   | TextContent 
   | ImageContent 
   | CodeContent 
   | ChartContent 
   | TableContent 
-  | ListContent;
+  | ListContent
+  | InfographicContent;
 
 export type SlideType = 'cover' | 'section' | 'content' | 'twoColumn';
 

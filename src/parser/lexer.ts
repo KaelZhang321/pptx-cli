@@ -1,5 +1,5 @@
 import yaml from 'yaml';
-import type { Presentation, Slide, SlideContent, SlideMeta, SlideType } from './ast.js';
+import type { Presentation, Slide, SlideContent, SlideMeta, SlideType, InfographicContent } from './ast.js';
 
 export class MarkdownParser {
   private slideIndex = 0;
@@ -39,12 +39,10 @@ export class MarkdownParser {
   }
 
   private detectSlideType(title: string, contents: SlideContent[], isFirstSlide: boolean): SlideType {
-    // First slide with title is cover
     if (isFirstSlide && title) {
       return 'cover';
     }
     
-    // H1 header with little content is section
     const hasH1 = title && !title.startsWith('##');
     const contentCount = contents.filter(c => c.type !== 'text' || c.text.trim()).length;
     if (hasH1 && contentCount <= 2) {
@@ -55,7 +53,10 @@ export class MarkdownParser {
   }
 
   private parseSlide(markdown: string): Slide {
-    const lines = markdown.trim().split('\n');
+    const codeBlocks = this.extractCodeBlocks(markdown);
+    let processedMarkdown = this.removeCodeBlocks(markdown);
+    
+    const lines = processedMarkdown.trim().split('\n');
     let title = '';
     let subtitle = '';
     let template: string | undefined;
@@ -63,20 +64,17 @@ export class MarkdownParser {
     const meta: { author?: string; date?: string; highlight?: string } = {};
 
     for (const line of lines) {
-      // Check for template directive
       const templateMatch = line.match(/<!--\s*template:\s*(\w+)\s*-->/);
       if (templateMatch) {
         template = templateMatch[1];
         continue;
       }
 
-      // Check for slide type directive
       const typeMatch = line.match(/<!--\s*type:\s*(\w+)\s*-->/);
       if (typeMatch) {
-        continue; // Will be handled by type detection
+        continue;
       }
 
-      // Check for meta directives
       const authorMatch = line.match(/<!--\s*author:\s*(.+)\s*-->/);
       if (authorMatch) {
         meta.author = authorMatch[1];
@@ -93,21 +91,18 @@ export class MarkdownParser {
         continue;
       }
 
-      // H2 header (##) - main title
       const h2Match = line.match(/^##\s+(.+)$/);
       if (h2Match) {
         title = h2Match[1];
         continue;
       }
 
-      // H1 header (#) - title or section
       const h1Match = line.match(/^#\s+(.+)$/);
       if (h1Match && !title) {
         title = h1Match[1];
         continue;
       }
 
-      // H3 header (###) - subtitle
       const h3Match = line.match(/^###\s+(.+)$/);
       if (h3Match) {
         subtitle = h3Match[1];
@@ -119,10 +114,16 @@ export class MarkdownParser {
       contents.push(this.parseLine(line));
     }
 
-    // Consolidate list items
+    for (const block of codeBlocks) {
+      if (block.language === 'infographic' || block.language === 'ifgc') {
+        contents.push(this.parseInfographicBlock(block));
+      } else if (block.language) {
+        contents.push({ type: 'code', language: block.language, code: block.code });
+      }
+    }
+
     const consolidatedContents = this.consolidateLists(contents);
     
-    // Detect slide type
     const type = this.detectSlideType(title, consolidatedContents, this.slideIndex === 0);
 
     const slide: Slide = { title, contents: consolidatedContents, type };
@@ -131,6 +132,46 @@ export class MarkdownParser {
     if (Object.keys(meta).length > 0) slide.meta = meta;
 
     return slide;
+  }
+
+  private extractCodeBlocks(markdown: string): Array<{ language: string; code: string; meta?: string }> {
+    const blocks: Array<{ language: string; code: string; meta?: string }> = [];
+    const regex = /```(\w+)?(?:\s+([^\n]*))?\n([\s\S]*?)```/g;
+    
+    let match;
+    while ((match = regex.exec(markdown)) !== null) {
+      blocks.push({
+        language: match[1] || '',
+        meta: match[2],
+        code: match[3].trim(),
+      });
+    }
+    
+    return blocks;
+  }
+
+  private removeCodeBlocks(markdown: string): string {
+    return markdown.replace(/```(\w+)?(?:\s+[^\n]*)?\n[\s\S]*?```/g, '');
+  }
+
+  private parseInfographicBlock(block: { code: string; meta?: string }): InfographicContent {
+    const content: InfographicContent = {
+      type: 'infographic',
+      syntax: block.code,
+    };
+    
+    if (block.meta) {
+      const metaParts = block.meta.split(/\s+/);
+      for (const part of metaParts) {
+        const [key, value] = part.split('=');
+        if (key === 'theme') content.theme = value;
+        if (key === 'template') content.template = value;
+        if (key === 'width') content.width = parseInt(value, 10);
+        if (key === 'height') content.height = parseInt(value, 10);
+      }
+    }
+    
+    return content;
   }
 
   private consolidateLists(contents: SlideContent[]): SlideContent[] {
